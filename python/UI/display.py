@@ -122,7 +122,7 @@ class DmesgApp1(QtWidgets.QWidget):
         self.port += 1
         if flag:
             self.name2 = f"vkernel{self.port}"
-            command = f"docker run --rm -d --name {self.name2} -p {self.port}:22 --privileged -runtime=vkernel-runtime {test_image}"
+            command = f"docker run --rm -d --name {self.name2} -p {self.port}:22 --privileged --runtime=vkernel-runtime {test_image}"
         else:
             self.name1 = f"normal{self.port}"
             command = f"docker run --rm -d --name {self.name1} -p {self.port}:22 --privileged {test_image}"
@@ -651,7 +651,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
             self.first = False
 
         if command != 'id':
-            command = f"/cdk.sh && /cdk.sh \"{command}\""
+            command = f"/cdk.sh \"{command}\""
 
         try:
             while self.channel.recv_ready():
