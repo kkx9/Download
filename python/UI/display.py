@@ -459,6 +459,9 @@ class PerformanceApp(QtWidgets.QWidget):
         process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
 
         process.start("sh", [script_path])
+        output = process.readAllStandardOutput().data().decode()
+
+        print(output)
 
 
 class CveApp(QtWidgets.QWidget):
@@ -535,7 +538,7 @@ class CveApp(QtWidgets.QWidget):
             # msg_box.setInformativeText(error_message)
             # msg_box.setIcon(QtWidgets.QMessageBox.Critical)
             # msg_box.exec_()
-            QtWidgets.QMessageBox.critical(self, 'Failed', '容器已创建')
+            QtWidgets.QMessageBox.critical(self, 'Failed', '容器已创建，请勿重复创建')
             return
 
         if not self.flag:
@@ -602,7 +605,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
         self.connect_container()
 
         self.setWindowTitle(f"{self.name} container")
-        self.setFixedSize(400, 500)
+        self.setFixedSize(400, 550)
 
         # Create the main layout with 3 rows
         main_layout = QtWidgets.QVBoxLayout()
@@ -740,7 +743,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
                 else:
                     QtWidgets.QMessageBox.information(self, 'testuser', 'I am testuser')
             else:
-                time.sleep(0.1)
+                time.sleep(0.2)
                 output = ""
                 while not self.channel.recv_ready():
                     continue
@@ -794,7 +797,7 @@ class OutputApp(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Output')
-        self.setFixedSize(400, 500)
+        self.setFixedSize(600, 500)
 
         layout = QtWidgets.QVBoxLayout()
 
@@ -809,7 +812,7 @@ class OutputApp(QtWidgets.QWidget):
     def move_window(self):
         screen = QtWidgets.QDesktopWidget().screenGeometry()
         window_size = self.geometry()
-        x = (screen.width() - window_size.width()) // 6 * 5
+        x = (screen.width() - window_size.width()) // 20 * 19
         y = (screen.height() - window_size.height()) // 3
         self.move(x, y)
 
