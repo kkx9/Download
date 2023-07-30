@@ -606,6 +606,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
     def __init__(self, name, flag):
         super().__init__()
         self.output_app = None
+        self.root_clicked = False
         self.name = name
         self.flag = flag
         self.client = None
@@ -624,7 +625,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
 
         row, col = 0, 0
         button = QtWidgets.QToolButton(self)
-        button.clicked.connect(self.upgrade_to_root)
+        button.clicked.connect(lambda _, f=True: self.upgrade_to_root(f))
         button.setIcon(QtGui.QIcon('user_root.png'))
         button.setIconSize(QtCore.QSize(128, 128))
         button.setText('Root')
@@ -709,7 +710,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, '进入容器失败', f"无法进入容器: {e}")
 
-    def upgrade_to_root(self):
+    def upgrade_to_root(self, flag=True):
         while self.channel.recv_ready():
             self.channel.recv(65535).decode()
 
@@ -721,7 +722,8 @@ class ContainerCommandApp(QtWidgets.QWidget):
         while self.channel.recv_ready():
             output += self.channel.recv(65535).decode()
         print(output)
-        if self.first:
+        if flag:
+            self.root_clicked = True
             if 'Operation not permitted' in output:
                 QtWidgets.QMessageBox.critical(self, 'Failed', '切换到root用户失败。')
                 return
@@ -738,7 +740,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
             while self.channel.recv_ready():
                 self.channel.recv(65535).decode()
             self.channel.send(f"{command}\n")
-            time.sleep(0.1)
+            time.sleep(0.5)
             output = ""
             while not self.channel.recv_ready():
                 continue
@@ -751,7 +753,7 @@ class ContainerCommandApp(QtWidgets.QWidget):
                 else:
                     QtWidgets.QMessageBox.information(self, 'testuser', 'I am testuser')
             else:
-                time.sleep(0.2)
+                time.sleep(0.5)
                 output = ""
                 while not self.channel.recv_ready():
                     continue
@@ -787,7 +789,8 @@ class ContainerCommandApp(QtWidgets.QWidget):
                 process.waitForFinished()
                 time.sleep(0.1)
                 self.connect_container()
-                self.upgrade_to_root()
+                if self.root_clicked:
+                    self.upgrade_to_root(False)
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, '错误', f"执行命令出错: {e}")
 
