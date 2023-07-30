@@ -1,6 +1,6 @@
-import os
 import sys
 import time
+import subprocess
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
@@ -390,6 +390,7 @@ class DmesgApp(QtWidgets.QWidget):
 class PerformanceApp(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        self.process = None
         self.url = 'http://127.0.0.1:8000'
         self.setWindowTitle('Performance Presentation')
         self.setFixedSize(400, 500)
@@ -452,16 +453,23 @@ class PerformanceApp(QtWidgets.QWidget):
 
     def execute_scripts(self, s):
         path = "/home/liuyijie/Projects/vkernel/Annual/vkernel-display/web-server/scripts"
+        # path = "/home/yuehang"
         if "futex" in s:
             path += "/futex"
         script_path = f"{path}/{s}"
-        process = QtCore.QProcess(self)
-        process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+        self.process = subprocess.Popen(['sh', script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 
-        process.start("sh", [script_path])
-        output = process.readAllStandardOutput().data().decode()
+        while True:
+            output = self.process.stdout.readline()
+            if output == '' and self.process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
 
-        print(output)
+        if self.process.poll() == 0:
+            print("执行成功")
+        else:
+            print("执行失败")
 
 
 class CveApp(QtWidgets.QWidget):
